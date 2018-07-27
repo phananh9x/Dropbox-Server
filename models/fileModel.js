@@ -4,9 +4,9 @@ var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
 /**
- * Image Schema
+ * File Schema
  */
-var ImageSchema = new Schema({
+var FileSchema = new Schema({
   fieldname: {
     type: String,
   },
@@ -23,7 +23,7 @@ var ImageSchema = new Schema({
     type: String,
   },
   filename: String,
-  path: {
+  filepath: {
     type: String,
   },
   size: {
@@ -34,7 +34,13 @@ var ImageSchema = new Schema({
   },
   updated_at: {
     type: Date,
-  }
+  },
+  fileparent: String,
+  isfile: String,
+  owner: String,
+  sharedcount: Number,
+  sharedlist : Array,
+  starred : Boolean
 });
 
-mongoose.model('File', ImageSchema);
+mongoose.model('File', FileSchema);

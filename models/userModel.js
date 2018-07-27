@@ -39,7 +39,10 @@ var UserSchema = new Schema({
   created: {
     type: Date,
     default: Date.now
-  }
+  },
+  contactno: String,
+  interests: String,
+  lastlogintime: Date
 });
 
 UserSchema.methods.comparePassword = function(password) {
