@@ -8,10 +8,15 @@ var mongoose = require('mongoose'),
  * User Schema
  */
 var UserSchema = new Schema({
-  fullName: {
+  firstname: {
     type: String,
     trim: true,
-    required: true
+    lowercase: true,
+  },
+  lastname: {
+    type: String,
+    trim: true,
+    lowercase: true,
   },
   image: {
     type: String

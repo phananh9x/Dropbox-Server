@@ -12,7 +12,9 @@ exports.register = function(req, res) {
       req.body.image = config.avatarDefaultFeMale;
     }
   }
+  console.log(req.body)
   var newUser = new User(req.body);
+
 
   newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
   newUser.save(function(err, user) {
@@ -29,14 +31,14 @@ exports.register = function(req, res) {
 };
 
 exports.get = function(req, res) {
-    User.find({ _id : req.user.user._id }, function(err, data) {
+    User.find({email: req.user.user.email }, function(err, data) {
       if (err) 
         return res.status(400).send({
           success: false, 
           results: null,
           message: err
         });
-      return res.send({success: true, results: data});
+      return res.send({success: true, results: data[0]});
     });
 };
 
@@ -44,6 +46,7 @@ exports.sign_in = function(req, res) {
   User.findOne({
     email: req.body.email
   }, function(err, user) {
+  console.log(user)
     if (err)
       return res.status(500).send({
         success: false,
@@ -99,6 +102,7 @@ exports.delete = function(req, res) {
 
 
 exports.loginRequired = function(req, res, next) {
+  console.log(req.user)
   if (req.user) {
     next();
   } else {
