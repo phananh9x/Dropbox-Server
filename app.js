@@ -12,6 +12,8 @@ var cors = require('cors')
 
 var User   = require('./models/userModel'); 
 var File   = require('./models/fileModel'); 
+var UserLog   = require('./models/userLogModel'); 
+
 
 var index = require('./routes/index');
 var users = require('./routes/users');

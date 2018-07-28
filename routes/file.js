@@ -15,6 +15,6 @@ var upload = multer({storage: storage});
 var router = express.Router();
 
 router.get('/:fileId',userHandlers.loginRequired, fileHandlers.get);
-router.post('/', upload.any(),userHandlers.loginRequired, fileHandlers.create);
+router.post('/upload', upload.any(),userHandlers.loginRequired, fileHandlers.create);
 
 module.exports = router;

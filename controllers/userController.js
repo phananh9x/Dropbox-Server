@@ -1,8 +1,11 @@
 var mongoose = require('mongoose'),
 	config = require('../config'),
-  	jwt = require('jsonwebtoken'),
-  	bcrypt = require('bcrypt'),
-  	User = mongoose.model('User');
+	jwt = require('jsonwebtoken'),
+	bcrypt = require('bcrypt'),
+  User = mongoose.model('User'),
+  File = mongoose.model('File'),
+	UserLog = mongoose.model('UserLog');
+var fs = require('fs');
 
 exports.register = function(req, res) {
   if (!req.body.image) {
@@ -12,10 +15,9 @@ exports.register = function(req, res) {
       req.body.image = config.avatarDefaultFeMale;
     }
   }
-  console.log(req.body)
   var newUser = new User(req.body);
-
-
+  var userLog = new UserLog();
+  userLog.user = req.body.email;
   newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
   newUser.save(function(err, user) {
     if (err)
@@ -25,28 +27,94 @@ exports.register = function(req, res) {
         message: err
       });
     user.hash_password = undefined;
-    console.log(user)
-    return res.send({success: true, results: user});
+    userLog.save(function(err) {
+      if (err) {
+          throw err;
+          return res.status(500).send({
+                  success: false,
+                  results: null,
+                  message: err
+                });
+      }
+      else {
+          var splitemail = req.body.email.split('.')[0];
+          var dir = './public/uploads/' + splitemail;
+          if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir);
+          }
+          return res.send({success: true, results: user});
+      }
+  });
   });
 };
 
 exports.get = function(req, res) {
-    User.find({email: req.user.user.email }, function(err, data) {
-      if (err) 
-        return res.status(400).send({
-          success: false, 
-          results: null,
-          message: err
-        });
-      return res.send({success: true, results: data[0]});
+  var user={}
+  var email = req.user.user.email ;
+  var userdetails={
+      firstname: '',
+      lastname: '',
+      email: '',
+      contactno: '',
+      interests:'',
+      lastlogin:'',
+      files :[],
+      filelog:[],
+      grouplog:[]
+
+  }
+  User.findOne({email: email }, function(err, user) {
+    if (err) 
+      return res.status(400).send({
+        success: false, 
+        results: null,
+        message: "Failed to get user details"
+      });
+    File.find( {$or: [ {'owner': email, 'fileparent':''}, {'sharedlist': email}]} , function (err, filesArr) {
+      if (err) {
+          throw err;
+          return res.status(400).send({
+            success: false, 
+            results: null,
+            message: "Failed to get user details"
+          });
+      }
+      UserLog.findOne({'user': email}, function (err, log) {
+        if (err) {
+            throw err;
+            return res.status(400).send({
+              success: false, 
+              results: null,
+              message: "Failed to get user details"
+            });
+        }
+
+        if (!user) {
+            return res.status(400).send({
+              success: false, 
+              results: null,
+              message: "Failed to get user details"
+            });
+        }
+        userdetails.firstname = user.firstname;
+        userdetails.lastname = user.lastname;
+        userdetails.email = user.email;
+        userdetails.contactno = user.contactno;
+        userdetails.interests = user.interests;
+        userdetails.lastlogin = user.lastlogintime;
+        userdetails.filelog = log.filelog;
+        userdetails.grouplog = log.grouplog;
+        userdetails.files = filesArr;
+        return res.send({success: true, results: userdetails});
+      });
     });
+  });
 };
 
 exports.sign_in = function(req, res) {
   User.findOne({
     email: req.body.email
   }, function(err, user) {
-  console.log(user)
     if (err)
       return res.status(500).send({
         success: false,
@@ -60,17 +128,32 @@ exports.sign_in = function(req, res) {
         message: 'Authentication failed. Invalid user or password.'
       });
     }
-    return res.send({success: true, results: {
-      token: jwt.sign({ user },
-      config.secret) ,
-      fullName:user.fullName,
-      _id: user._id,
-      email: user.email,
-			phone: user.phone,
-			address: user.address,
-			gender: user.gender,
-			birthday: user.birthday,
-      image: user.image}});
+    User.update({'email': req.body.email},{lastlogintime: new Date()}, function (err) {
+      if (err) {
+          throw err;
+          console.log("Error inserting last login....")
+          return res.status(500).send({
+            success: false,
+            results: null,
+            message: 'Error inserting last login....'
+          });
+      }
+      else {
+        console.log("last login inserted....")
+        return res.send({success: true, results: {
+          token: jwt.sign({ user },
+          config.secret) ,
+          fullName:user.fullName,
+          _id: user._id,
+          email: user.email,
+          phone: user.phone,
+          address: user.address,
+          gender: user.gender,
+          birthday: user.birthday,
+          image: user.image}});
+        }
+  });
+    
   });
 };
 
@@ -102,7 +185,6 @@ exports.delete = function(req, res) {
 
 
 exports.loginRequired = function(req, res, next) {
-  console.log(req.user)
   if (req.user) {
     next();
   } else {
