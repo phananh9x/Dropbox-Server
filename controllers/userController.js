@@ -71,6 +71,7 @@ exports.get = function(req, res) {
         message: "Failed to get user details"
       });
     File.find( {$or: [ {'owner': email, 'fileparent':''}, {'sharedlist': email}]} , function (err, filesArr) {
+      console.log("filelist", filesArr)
       if (err) {
           throw err;
           return res.status(400).send({

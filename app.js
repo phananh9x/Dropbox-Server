@@ -50,6 +50,7 @@ app.use(function(req, res, next) {
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/files', file);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
