@@ -13,11 +13,13 @@ var cors = require('cors')
 var User   = require('./models/userModel'); 
 var File   = require('./models/fileModel'); 
 var UserLog   = require('./models/userLogModel'); 
+var Groups   = require('./models/groupsModel'); 
 
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var file = require('./routes/file');
+var groups = require('./routes/groups');
 
 var app = express();
 app.use(cors())
@@ -51,6 +53,7 @@ app.use(function(req, res, next) {
 app.use('/', index);
 app.use('/users', users);
 app.use('/files', file);
+app.use('/groups', groups);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

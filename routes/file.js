@@ -23,6 +23,9 @@ router.get('/:fileId',userHandlers.loginRequired, fileHandlers.get);
 router.post('/upload', upload.single('file'),userHandlers.loginRequired, fileHandlers.create);
 router.post('/delete',userHandlers.loginRequired, fileHandlers.delete);
 router.post('/makefolder',userHandlers.loginRequired, fileHandlers.makefolder);
+router.post('/sharefileingroup',userHandlers.loginRequired, fileHandlers.shareFileInGroup);
+router.post('/sharefile',userHandlers.loginRequired, fileHandlers.shareFile);
+router.post('/star',userHandlers.loginRequired, fileHandlers.makeStar);
 router.post('/:folderId',userHandlers.loginRequired, fileHandlers.getFiles);
 
 module.exports = router;

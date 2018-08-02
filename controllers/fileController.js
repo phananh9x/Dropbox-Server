@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
   	File = mongoose.model('File'),
-  	UserLog = mongoose.model('UserLog');
+    UserLog = mongoose.model('UserLog'),
+  	Group = mongoose.model('Group');
 var fs = require('fs');
 
 exports.get = function(req, res, next) {
@@ -65,7 +66,6 @@ exports.create = function(req, res, next) {
 		        if(err)
 		            console.log("err", err);
 		        else {
-		            console.log('File created');
 
 		            newfile.save(function (err) {
 
@@ -92,7 +92,6 @@ exports.create = function(req, res, next) {
 		                        else {
 		                            res.code = "200";
 		                            res.value = {"filedata": filedata};
-		                            console.log(filedata)
     								return res.send({success: true, results: filedata, value : filedata});
 		                        }
 
@@ -107,7 +106,6 @@ exports.create = function(req, res, next) {
 
 
 exports.delete = function(req, res, next) {
-	console.log(req.body)
 
 	var filename = req.body.filename;
     var isfile = req.body.isfile;
@@ -153,7 +151,6 @@ exports.delete = function(req, res, next) {
 
             }
             else {
-                console.log(filepath)
                 fs.unlinkSync(filepath);
             }
 
@@ -173,7 +170,6 @@ exports.delete = function(req, res, next) {
                             throw err;
                         }
                         else {
-                            console.log("Success")
                             res.value = "File Deleted Successfully!";
 							return res.send({success: true, results: "File Deleted Successfully!"});
 
@@ -188,7 +184,6 @@ exports.delete = function(req, res, next) {
         }
 
         else{
-			console.log(owner);
             File.update({'filepath':filepath}, { $set:{sharedcount:count-1}, $pull: {sharedlist: email}}, function(err){
 
                 if(err){
@@ -224,12 +219,11 @@ exports.delete = function(req, res, next) {
 
 
 exports.makefolder = function(req, res, next) {
-	console.log(req.body)
 	var splitedemail = req.user.user.email.split('.')[0];
 
     var filename = req.body.foldername;
 
-    var filepath = './public/uploads/'+splitedemail+'/'+filename;
+    var filepath = !req.body.fileparent ? './public/uploads/'+splitedemail+'/'+filename : req.body.fileparent+"/" + filename;
     var fileparent = req.body.fileparent;
     var isfile = req.body.isfile;
 
@@ -260,7 +254,8 @@ exports.makefolder = function(req, res, next) {
         'actiontime': new Date()
     };
 
-    var dir = './public/uploads/'+splitedemail+'/'+filename;
+    // var dir = './public/uploads/'+splitedemail+'/'+filename;
+    var dir = filepath;
 
     if (!fs.existsSync(dir)){
 
@@ -300,14 +295,36 @@ exports.makefolder = function(req, res, next) {
 };
 
 
-exports.makeStart = function(req, res, next) {
-	console.log(req.body)
+exports.makeStar = function(req, res, next) {
+	// console.log(req.body)
+	// var filepath = msg.file.filepath;
+    // var starred = msg.file.starred;
+
+
+   //  File.update( {'filepath' : filepath}, {$set:{'starred':starred}} , function (err) {
+
+   //      if (err) {
+   //          throw err;
+   //          return res.status(400).send({
+			// 	success: false, 
+			// 	results: null,
+			// 	message: err
+			// });
+   //      }
+
+   //      else {
+
+   //          res.code = "200";
+   //          res.value = {'starred':starred}
+   //          callback(null, res);
+   //      }
+
+   //  });
 	
 };
 
 exports.getFiles = function(req, res, next) {
 	File.findOne({_id: req.params.folderId}, function (err, folder) {
-		console.log('folder', folder)
 		var email=req.user.user.email;
 	    var filepath=folder.filepath;
 	    var files=[];
@@ -326,9 +343,9 @@ exports.getFiles = function(req, res, next) {
 				});
 	        }
 	        else {
-	        	console.log(filesArr)
 	            files=filesArr;
 	            let value = {"files": files};
+                value.filepath = filepath;
 				return res.send({success: true, results: value, value});
 	        }
 
@@ -336,3 +353,126 @@ exports.getFiles = function(req, res, next) {
 	});
 	
 };
+
+exports.shareFile = function(req, res, next) {
+    var userEmail=req.user.user.email;
+    var shareEmail= req.body.shareEmail;
+
+    var file=req.body.filedata;
+    var count = file.sharedcount;
+    var filename = file.filename;
+    var filepath = file.filepath;
+    var fileparent = file.fileparent;
+    var isfile = file.isfile;
+
+    var log={
+        'filename':filename,
+        'filepath':filepath,
+        'isfile':isfile=='T'?"File":"Folder",
+        'action':'Share File',
+        'actiontime': new Date()
+    };
+
+
+    File.update({'filepath':filepath}, { $set:{sharedcount:count+1}, $push: {sharedlist: shareEmail}}, function(err){
+
+        if(err){
+            throw err;
+            let value = {"shareEmail":shareEmail}
+            return res.status(400).send({
+                success: false, 
+                results: value,
+                value
+            });
+
+        }
+        else{
+
+            UserLog.update({'user': userEmail}, {$push: {filelog:log}}, function (err) {
+                if (err) {
+                    throw err;
+                    return res.status(400).send({
+                        success: false, 
+                        results: value,
+                        message: "Error inserting last login...."
+                    });
+                }
+                else {
+                    return res.send({success: true, results: "Success"});
+
+                }
+
+            });
+        }
+    });
+
+}
+
+exports.shareFileInGroup = function(req, res, next) {
+	var userEmail=req.user.user.email;
+    var group= req.body.group;
+
+    var file=req.body.file;
+    var count = file.sharedcount;
+    var filename = file.filename;
+    var filepath = file.filepath;
+    var fileparent = file.fileparent;
+    var isfile = file.isfile;
+
+    var log={
+        'filename':filename,
+        'filepath':filepath,
+        'isfile':isfile=='T'?"File":"Folder",
+        'action':'Share File with group '+group,
+        'actiontime': new Date()
+    };
+
+
+    Group.findOne( {'groupname': group, 'owner': userEmail}, function (err, groupData) {
+
+        if (err) {
+            console.log(err)
+            throw err;
+        }
+
+        if(!group){
+        	return res.status(400).send({
+				success: false, 
+				results: null,
+				message: "Group not found!"
+			});
+        }
+        else {
+            var membersArr = groupData.members;
+
+            for(var i=0; i<membersArr.length; i++){
+
+                count+=1;
+                File.update({'filepath':filepath}, { $set:{sharedcount:count+1}, $push: {sharedlist: membersArr[0].email}}, function(err){
+
+                    if(err){
+                        throw err;
+                        let value = {"group":group}
+						return res.send({success: true, results: value, value});
+                    }
+
+                });
+            }
+
+            UserLog.update({'user': userEmail}, {$push: {filelog:log}}, function (err) {
+                if (err) {
+                    throw err;
+                    return res.status(400).send({
+						success: false, 
+						results: null,
+						message: "UserLog not found!"
+					});
+                }
+                else {
+                    let value = {"sharedcount":count}
+					return res.send({success: true, results: value, value});
+                }
+            });
+        }
+    });
+}

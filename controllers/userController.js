@@ -31,10 +31,10 @@ exports.register = function(req, res) {
       if (err) {
           throw err;
           return res.status(500).send({
-                  success: false,
-                  results: null,
-                  message: err
-                });
+                success: false,
+                results: null,
+                message: err
+              });
       }
       else {
           var splitemail = req.body.email.split('.')[0];
@@ -71,7 +71,6 @@ exports.get = function(req, res) {
         message: "Failed to get user details"
       });
     File.find( {$or: [ {'owner': email, 'fileparent':''}, {'sharedlist': email}]} , function (err, filesArr) {
-      console.log("filelist", filesArr)
       if (err) {
           throw err;
           return res.status(400).send({
