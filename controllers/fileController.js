@@ -262,7 +262,7 @@ exports.makefolder = function(req, res, next) {
         fs.mkdirSync(dir);
     }
 
-    newfolder.save( function (err) {
+    newfolder.save( function (err, data) {
 
         if(err){
         	return res.status(400).send({
@@ -283,7 +283,7 @@ exports.makefolder = function(req, res, next) {
 					});
                 }
                 else {
-                    var value = {"folderdata":folderdata, "message": "Folder created successfully!"};
+                    var value = {"folderdata":data, "message": "Folder created successfully!"};
 					return res.send({success: true, results: value, value : value});
 
                 }
