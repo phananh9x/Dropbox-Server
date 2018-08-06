@@ -1,0 +1,34 @@
+lang: 36.1221442 long: -115.165274899999
+
+                    <div style={{padding: Screen.percentOfHeight(1), marginBottom: Screen.percentOfHeight(5)}}>
+                        <div style={{display: 'flex', alignItems: 'center', flexDirection: 'row', justifyContent: 'center'}}>
+                            <div style={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
+                                <div style={{ display: 'flex',alignItems: 'center', padding: '10px 10px' }}>
+                                    <div style={{ width: Screen.percentWidth(5),height: Screen.percentWidth(5), backgroundColor: 'orange', borderRadius:'50%' , display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                                        <img style={wellness_score_bar_icon} src={AppConfig.staticUrl + "/images/ic_nutrition_white.png"} /> 
+                                    </div>
+                                    <div>Nutrition</div>
+                                </div>
+                                <div style={{ display: 'flex',alignItems: 'center', padding: '10px 10px' }}>
+                                    <div style={{ width: Screen.percentWidth(5),height: Screen.percentWidth(5), backgroundColor: 'green', borderRadius:'50%' , display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                                        <img style={wellness_score_bar_icon} src={AppConfig.staticUrl + "/images/ic_nutrition_white.png"} /> 
+                                    </div>
+                                    <div>Physical</div>
+                                </div>
+                            </div>
+                            <div style={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
+                                <div style={{ display: 'flex',alignItems: 'center', padding: '10px 10px' }}>
+                                    <div style={{ width: Screen.percentWidth(5),height: Screen.percentWidth(5), backgroundColor: 'red', borderRadius:'50%' , display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                                        <img style={wellness_score_bar_icon} src={AppConfig.staticUrl + "/images/ic_nutrition_white.png"} /> 
+                                    </div> 
+                                    <div>Wellbeing</div>
+                                </div>
+                                <div style={{ display: 'flex',alignItems: 'center', padding: '10px 10px' }}>
+                                    <div style={{ width: Screen.percentWidth(5),height: Screen.percentWidth(5), backgroundColor: 'blue', borderRadius:'50%' , display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                                        <img style={wellness_score_bar_icon} src={AppConfig.staticUrl + "/images/ic_nutrition_white.png"} /> 
+                                    </div>
+                                    <div>Wellness</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
