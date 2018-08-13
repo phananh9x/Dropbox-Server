@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
     UserLog = mongoose.model('UserLog'),
   	Group = mongoose.model('Group');
 var fs = require('fs');
-
+var rimraf = require('rimraf');
 exports.get = function(req, res, next) {
   	File.findById(req.params.imageId, function (err, data) {
 	  if (err) 
@@ -17,23 +17,19 @@ exports.get = function(req, res, next) {
 };
 
 exports.create = function(req, res, next) {
-	var filepath = './public/uploads/'+req.file.filename;
-    fs.readFile(filepath,'base64', function(err, buffer) {
+	var filepath = './public/uploads/'+req.file.filename; // đường dẫn ủa file tải lên
+    fs.readFile(filepath,'base64', function(err, buffer) { // đọc file từ đường dẫn trả về buffer
         if(err) {
             console.log("err", err);
         }
         else {
 		    var splitedemail = req.user.user.email.split('.')[0];
 		    var filename = req.file.filename;
-		    var filepath = './public/uploads/'+splitedemail+'/'+req.file.filename;
+		    var filepath = './public/uploads/'+splitedemail+'/'+req.file.filename; // tạo đường dẫn mới của file lưu theo từng user khác nhau
 		    var fileparent = req.body.fileparent;
 		    var isfile = req.body.isfile;
-
-
 		    if(fileparent)
 		        filepath=fileparent+'/'+filename
-
-
 		    var filedata={
 		        'filename': filename,
 		        'filepath':filepath,
@@ -43,7 +39,6 @@ exports.create = function(req, res, next) {
 		        'sharedcount':0,
 		        'starred' : false
 		    };
-
 		    var newfile=new File();
 		    newfile.filename = filename,
 	        newfile.filepath = filepath,
@@ -52,8 +47,6 @@ exports.create = function(req, res, next) {
 	        newfile.owner = req.user.user.email,
 	        newfile.sharedcount = 0,
 	        newfile.starred = false
-
-
 		    var log={
 		        'filename':filename,
 		        'filepath':filepath,
@@ -61,13 +54,12 @@ exports.create = function(req, res, next) {
 		        'action':'Upload File',
 		        'actiontime': new Date()
 		    };
-
-		    fs.writeFile(filepath, new Buffer(buffer, 'base64'), function(err) {
+		    fs.writeFile(filepath, new Buffer(buffer, 'base64'), function(err) { // ghi file vào đường dẫn mới
 		        if(err)
 		            console.log("err", err);
 		        else {
 
-		            newfile.save(function (err) {
+		            newfile.save(function (err) { // lưu  thông tin file vào database
 
 		                if (err) {
 		                    console.log(err)
@@ -78,11 +70,9 @@ exports.create = function(req, res, next) {
 							});
 		                }
 		                else {
-
-		                    UserLog.update({'user': req.user.user.email}, {$push: {filelog: log}}, function (err) {
+		                    UserLog.update({'user': req.user.user.email}, {$push: {filelog: log}}, function (err) { // lưu thông tin user log 
 		                        if (err) {
 		                            throw err;
-		                            console.log("Error inserting last login....")
 		                            return res.status(400).send({
 										success: false, 
 										results: null,
@@ -92,7 +82,7 @@ exports.create = function(req, res, next) {
 		                        else {
 		                            res.code = "200";
 		                            res.value = {"filedata": filedata};
-    								return res.send({success: true, results: filedata, value : filedata});
+    								return res.send({success: true, results: filedata, value : filedata});// trả kết quả về cho client
 		                        }
 
 		                    });

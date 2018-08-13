@@ -8,13 +8,6 @@ var mongoose = require('mongoose'),
 var fs = require('fs');
 
 exports.register = function(req, res) {
-  if (!req.body.image) {
-    if (req.body.gender == "true") {
-      req.body.image = config.avatarDefaultMale;
-    }else {
-      req.body.image = config.avatarDefaultFeMale;
-    }
-  }
   var newUser = new User(req.body);
   var userLog = new UserLog();
   userLog.user = req.body.email;
@@ -113,22 +106,22 @@ exports.get = function(req, res) {
 
 exports.sign_in = function(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email // Tìm user theo email
   }, function(err, user) {
     if (err)
-      return res.status(500).send({
+      return res.status(500).send({ // Trả về lỗi nếu có lỗi trong quá trình tìm kiếm
         success: false,
         results: null,
         message: err
       });
-    if (!user || !user.comparePassword(req.body.password)) {
+    if (!user || !user.comparePassword(req.body.password)) {// Kiểm tra nếu không có user và so sánh pass word không chính xác thì trả về lỗi
       return res.status(500).send({
         success: false,
         results: null,
         message: 'Authentication failed. Invalid user or password.'
       });
     }
-    User.update({'email': req.body.email},{lastlogintime: new Date()}, function (err) {
+    User.update({'email': req.body.email},{lastlogintime: new Date()}, function (err) { // cập nhật lần cuối đăng nhập của user
       if (err) {
           throw err;
           console.log("Error inserting last login....")
@@ -140,7 +133,7 @@ exports.sign_in = function(req, res) {
       }
       else {
         console.log("last login inserted....")
-        return res.send({success: true, results: {
+        return res.send({success: true, results: {// Trả về json thông tin user + token (JWT)
           token: jwt.sign({ user },
           config.secret) ,
           fullName:user.fullName,
@@ -153,7 +146,6 @@ exports.sign_in = function(req, res) {
           image: user.image}});
         }
   });
-    
   });
 };
 
