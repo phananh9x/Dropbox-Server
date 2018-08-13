@@ -23,7 +23,7 @@ exports.create = function(req, res, next) {
             console.log("err", err);
         }
         else {
-            fs.unlinkSync(filepath);
+            fs.unlinkSync('./public/uploads/'+req.file.filename);
 		    var splitedemail = req.user.user.email.split('.')[0];
 		    var filename = req.file.filename;
 		    var filepath = './public/uploads/'+splitedemail+'/'+req.file.filename; // tạo đường dẫn mới của file lưu theo từng user khác nhau
