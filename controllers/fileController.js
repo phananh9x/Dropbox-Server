@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
     UserLog = mongoose.model('UserLog'),
   	Group = mongoose.model('Group');
 var fs = require('fs');
-var rimraf = require('rimraf');
+
 exports.get = function(req, res, next) {
   	File.findById(req.params.imageId, function (err, data) {
 	  if (err) 
@@ -23,6 +23,7 @@ exports.create = function(req, res, next) {
             console.log("err", err);
         }
         else {
+            fs.unlinkSync(filepath);
 		    var splitedemail = req.user.user.email.split('.')[0];
 		    var filename = req.file.filename;
 		    var filepath = './public/uploads/'+splitedemail+'/'+req.file.filename; // tạo đường dẫn mới của file lưu theo từng user khác nhau
